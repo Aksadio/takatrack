@@ -20,9 +20,9 @@ router = APIRouter(prefix="/api/transactions", tags=["transactions"])
 
 def _max_upload_bytes() -> int:
     try:
-        return max(1, min(int(os.getenv("MAX_UPLOAD_BYTES", "1048576")), 5_000_000))
+        return max(1, min(int(os.getenv("MAX_UPLOAD_BYTES", "5242880")), 5_000_000))
     except ValueError:
-        return 1_048_576
+        return 5_242_880
 
 
 def _csv_messages(text: str) -> list[str]:
@@ -63,21 +63,47 @@ def import_messages(payload: ImportRequest, db: Session = Depends(get_db), owner
 @router.post("/upload")
 async def upload_messages(file: UploadFile = File(...), db: Session = Depends(get_db), owner: str = Depends(get_owner)):
     filename = (file.filename or "").lower()
-    if Path(filename).suffix not in {".txt", ".csv"}:
-        raise HTTPException(status_code=415, detail="Upload a plain-text .txt or .csv file.")
+    suffix = Path(filename).suffix
+    allowed = {".txt", ".csv", ".jpg", ".jpeg", ".png"}
+    if suffix not in allowed:
+        raise HTTPException(
+            status_code=415,
+            detail="Upload a .txt, .csv, .jpg, .jpeg, or .png file.",
+        )
+
     raw = await file.read(_max_upload_bytes() + 1)
     if len(raw) > _max_upload_bytes():
-        raise HTTPException(status_code=413, detail=f"The upload must be {_max_upload_bytes():,} bytes or smaller.")
-    try:
-        text = raw.decode("utf-8-sig")
-    except UnicodeDecodeError as exc:
-        raise HTTPException(status_code=400, detail="The file must use UTF-8 text encoding.") from exc
-    if Path(filename).suffix == ".csv":
-        messages = _csv_messages(text)
-    else:
-        from app.services import split_sms_messages
+        raise HTTPException(
+            status_code=413,
+            detail=f"The upload must be {_max_upload_bytes():,} bytes or smaller.",
+        )
 
-        messages = split_sms_messages(text)
+    if suffix in {".jpg", ".jpeg", ".png"}:
+        from app.parser import GeminiFallbackError, SMSParseError, extract_sms_from_image
+
+        mime_type = "image/png" if suffix == ".png" else "image/jpeg"
+        try:
+            messages = extract_sms_from_image(raw, mime_type)
+        except SMSParseError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except GeminiFallbackError as exc:
+            raise HTTPException(
+                status_code=503,
+                detail="Image reading is unavailable. Check GEMINI_API_KEY and try again.",
+            ) from exc
+        if not messages:
+            raise HTTPException(status_code=422, detail="No transaction SMS could be found in the image.")
+    else:
+        try:
+            text = raw.decode("utf-8-sig")
+        except UnicodeDecodeError as exc:
+            raise HTTPException(status_code=400, detail="The file must use UTF-8 text encoding.") from exc
+        if suffix == ".csv":
+            messages = _csv_messages(text)
+        else:
+            from app.services import split_sms_messages
+            messages = split_sms_messages(text)
+
     payload = _validated_import(messages)
     return import_sms_messages(db, owner, payload.messages)
 
