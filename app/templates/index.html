@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0B1730">
+  <meta name="description" content="A calm, clear mobile-money SMS expense tracker for independent shop owners.">
+  <title>TakaTrack — shop money, made clear</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: { ink: '#0B1730', emerald: '#10B981', violet: '#9B8AFB' }, fontFamily: { sans: ['Inter', 'sans-serif'], heading: ['Poppins', 'sans-serif'] } } }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script defer src="/static/js/api-contracts.js"></script>
+  <script defer src="/static/js/app.js"></script>
+</head>
+<body>
+  <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+      <a class="brand" href="/" aria-label="TakaTrack home">
+        <img src="/static/logo.svg" alt="" class="brand-mark">
+        <span class="brand-word">Taka<span>Track</span><small data-i18n="brand.tagline">SHOP MONEY, MADE CLEAR</small></span>
+      </a>
+      <div class="sidebar-label" data-i18n="nav.workspace">WORKSPACE</div>
+      <nav class="primary-nav">
+        <button class="nav-item is-active" type="button" data-view="overview" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg>
+          <span data-i18n="nav.overview">Overview</span>
+        </button>
+        <button class="nav-item" type="button" data-view="transactions">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h8l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
+          <span data-i18n="nav.transactions">Transactions</span><span class="nav-count" id="nav-transaction-count">0</span>
+        </button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <button type="button" class="nav-item settings-nav" id="settings-open">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V2a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9Z"/></svg>
+        <span data-i18n="nav.settings">Settings</span>
+      </button>
+      <div class="privacy-card">
+        <div class="privacy-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.8 3 8.5 7 10 4-1.5 7-5.2 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <strong data-i18n="privacy.local.title">Your ledger stays yours</strong>
+        <p data-i18n="privacy.local.short">Saved in your local SQLite database.</p>
+      </div>
+      <div class="sidebar-foot"><span class="status-dot"></span><span data-i18n="sidebar.local">Local-first workspace</span></div>
+    </aside>
+
+    <div class="main-column">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="icon-button menu-toggle" id="menu-toggle" aria-label="Open navigation" data-i18n-title="nav.open">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+          <div class="breadcrumb"><span data-i18n="nav.workspace">WORKSPACE</span><b>/</b><strong id="breadcrumb-current" data-i18n="nav.overview">Overview</strong></div>
+        </div>
+        <div class="topbar-actions">
+          <div class="today-label" id="today-label"></div>
+          <button type="button" class="top-action" id="currency-quick" aria-label="Change display currency" data-i18n-title="settings.currency.title">
+            <span class="currency-spark">↗</span><span id="base-currency-label">BDT</span><span class="chevron">⌄</span>
+          </button>
+          <button type="button" class="icon-button" id="language-toggle" aria-label="Switch language"><span id="language-short">EN</span></button>
+          <button type="button" class="icon-button theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+            <svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z"/></svg>
+          </button>
+          <button type="button" class="avatar-button" id="top-settings" aria-label="Open settings">TT</button>
+        </div>
+      </header>
+
+      <main class="content-wrap">
+        <section class="page-content view-enter" id="overview-view" aria-labelledby="hero-title">
+          <div class="hero-panel">
+            <div class="hero-copy">
+              <div class="hero-kicker"><span class="hero-kicker-dot"></span><span data-i18n="hero.eyebrow">YOUR SHOP, IN SYNC</span></div>
+              <h1 id="hero-title"><span data-i18n="hero.title">A clearer view of<br>your money.</span></h1>
+              <p data-i18n="hero.subtitle">Every mobile-money move, brought together in one calm place.</p>
+              <button type="button" class="button button-hero" id="open-import">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="hero.add">Add SMS transactions</span>
+              </button>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+              <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div>
+              <div class="hero-glass-card">
+                <div class="hero-glass-head"><span class="hero-mini-logo"><img src="/static/logo.svg" alt=""></span><span class="hero-mini-brand">TakaTrack</span><span class="hero-mini-status"></span></div>
+                <div class="hero-glass-label" data-i18n="hero.snapshot">SHOP SNAPSHOT</div>
+                <div class="hero-glass-amount" id="hero-balance">৳0</div>
+                <div class="hero-glass-bottom"><span><i class="trend-up">↗</i> <span data-i18n="hero.net">net flow</span></span><span class="hero-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+              </div>
+              <div class="hero-float-pill"><span class="float-check">✓</span><span data-i18n="hero.organized">All caught up</span></div>
+              <div class="hero-float-dot dot-a"></div><div class="hero-float-dot dot-b"></div>
+            </div>
+          </div>
+
+          <div class="rate-warning" id="rate-warning" hidden>
+            <span class="warning-mark">!</span><span id="rate-warning-text"></span>
+            <button type="button" class="text-link" id="warning-settings" data-i18n="settings.open">Open settings</button>
+          </div>
+
+          <div class="section-heading metrics-heading">
+            <div><div class="section-eyebrow" data-i18n="overview.eyebrow">MONEY AT A GLANCE</div><h2 data-i18n="overview.title">Your overview</h2></div>
+            <div class="period-segment" role="group" aria-label="Dashboard period">
+              <button type="button" class="period-button" data-period="daily" data-i18n="period.day">Day</button>
+              <button type="button" class="period-button" data-period="weekly" data-i18n="period.week">Week</button>
+              <button type="button" class="period-button is-active" data-period="monthly" data-i18n="period.month">Month</button>
+            </div>
+          </div>
+          <div class="metrics-grid" id="metrics-grid">
+            <article class="metric-card metric-in" style="--card-index:0">
+              <div class="metric-top"><span class="metric-icon icon-in"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></span><span class="metric-badge" data-i18n="metric.inflow">Inflow</span></div>
+              <div class="metric-label" data-i18n="metric.received">Total received</div><div class="metric-value" data-total="total_received">—</div>
+              <div class="metric-foot"><span class="metric-sparkline spark-in">⌁⌁⌁⌁</span><span data-i18n="metric.money_in">Money in</span></div>
+            </article>
+            <article class="metric-card metric-out" style="--card-index:1">
+              <div class="metric-top"><span class="metric-icon icon-out"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14m6-6-6 6-6-6"/></svg></span><span class="metric-badge badge-out" data-i18n="metric.outflow">Outflow</span></div>
+              <div class="metric-label" data-i18n="metric.spent">Total spent</div><div class="metric-value" data-total="total_spent">—</div>
+              <div class="metric-foot"><span class="metric-sparkline spark-out">⌁⌁⌁⌁</span><span data-i18n="metric.money_out">Money out</span></div>
+            </article>
+            <article class="metric-card metric-fees" style="--card-index:2">
+              <div class="metric-top"><span class="metric-icon icon-fee"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M15 9.5c-.5-1.5-5-1.5-5 .5s4.5 1 4.5 3-4.5 2-5 .5M12 7.5v9"/></svg></span><span class="metric-badge badge-fee" data-i18n="metric.cost">Cost</span></div>
+              <div class="metric-label" data-i18n="metric.fees">Total fees</div><div class="metric-value" data-total="total_fees">—</div>
+              <div class="metric-foot"><span class="metric-sparkline spark-fee">⌁⌁⌁⌁</span><span data-i18n="metric.service_fees">Service fees</span></div>
+            </article>
+            <article class="metric-card metric-net" style="--card-index:3">
+              <div class="metric-top"><span class="metric-icon icon-net"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16 9 11l4 4 7-8"/><path d="M15 7h5v5"/></svg></span><span class="metric-badge badge-net" data-i18n="metric.net">Net</span></div>
+              <div class="metric-label" data-i18n="metric.net_balance">Net balance</div><div class="metric-value" data-total="net_balance">—</div>
+              <div class="metric-foot"><span class="metric-sparkline spark-net">⌁⌁⌁⌁</span><span data-i18n="metric.in_minus_out">Received minus spent</span></div>
+            </article>
+          </div>
+
+          <div class="analytics-grid">
+            <section class="surface-card chart-card" aria-labelledby="flow-title">
+              <div class="card-heading">
+                <div><div class="section-eyebrow" data-i18n="chart.eyebrow">CASH FLOW</div><h3 id="flow-title" data-i18n="chart.title">Money movement</h3><p id="period-caption" class="card-subtitle">This month</p></div>
+                <div class="chart-legend"><span><i class="legend-dot received-dot"></i><span data-i18n="metric.received_short">Received</span></span><span><i class="legend-dot spent-dot"></i><span data-i18n="metric.spent_short">Spent</span></span></div>
+              </div>
+              <div class="chart-stage">
+                <svg class="flow-chart" id="flow-chart" viewBox="0 0 640 220" preserveAspectRatio="none" role="img" aria-label="Cash flow chart">
+                  <defs>
+                    <linearGradient id="received-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#10B981" stop-opacity=".22"/><stop offset="1" stop-color="#10B981" stop-opacity="0"/></linearGradient>
+                    <linearGradient id="spent-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#9B8AFB" stop-opacity=".16"/><stop offset="1" stop-color="#9B8AFB" stop-opacity="0"/></linearGradient>
+                  </defs>
+                  <g class="chart-grid-lines"><path d="M32 24H624M32 68H624M32 112H624M32 156H624M32 200H624"/></g>
+                  <path id="received-area" class="chart-area area-received"></path><path id="spent-area" class="chart-area area-spent"></path>
+                  <path id="received-line" class="chart-line line-received"></path><path id="spent-line" class="chart-line line-spent"></path>
+                </svg>
+              </div>
+              <div class="chart-labels" id="chart-labels"></div>
+              <div class="chart-empty" id="chart-empty" hidden><span class="chart-empty-icon">↗</span><span data-i18n="chart.empty">Your money movement will show up here.</span></div>
+            </section>
+            <section class="surface-card categories-card" aria-labelledby="category-title">
+              <div class="card-heading"><div><div class="section-eyebrow" data-i18n="category.eyebrow">SPENDING MIX</div><h3 id="category-title" data-i18n="category.title">By category</h3></div><span class="card-more-icon">•••</span></div>
+              <div class="category-list" id="category-list"></div>
+              <div class="category-empty" id="category-empty" hidden><span class="empty-orbit">◌</span><p data-i18n="category.empty">Add a few transactions to see your spending mix.</p></div>
+            </section>
+          </div>
+
+          <div class="lower-grid">
+            <section class="surface-card counterparties-card" aria-labelledby="counterparty-title">
+              <div class="card-heading"><div><div class="section-eyebrow" data-i18n="counterparty.eyebrow">WHERE IT GOES</div><h3 id="counterparty-title" data-i18n="counterparty.title">Top counterparties</h3></div><button type="button" class="subtle-button" data-view="transactions" data-i18n="common.view_all">View all</button></div>
+              <div id="counterparty-list" class="counterparty-list"></div>
+              <div class="counterparty-empty" id="counterparty-empty" hidden><p data-i18n="counterparty.empty">Your regular payees will appear here.</p></div>
+            </section>
+            <section class="surface-card privacy-note-card">
+              <div class="privacy-note-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.8 3 8.5 7 10 4-1.5 7-5.2 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg></div>
+              <div><div class="section-eyebrow" data-i18n="privacy.title">PRIVATE BY DEFAULT</div><h3 data-i18n="privacy.local.title">Your ledger stays yours</h3><p data-i18n="privacy.full">Transactions are saved in the SQLite database on this app's machine. If regex parsing is uncertain and Gemini fallback is enabled, that SMS is sent to Google's Gemini API for extraction.</p></div>
+              <button type="button" class="text-link" id="privacy-more" data-i18n="privacy.learn">How parsing works</button>
+            </section>
+          </div>
+
+          <section class="surface-card recent-card" aria-labelledby="recent-title">
+            <div class="card-heading recent-heading"><div><div class="section-eyebrow" data-i18n="transactions.latest">LATEST ACTIVITY</div><h3 id="recent-title" data-i18n="transactions.recent">Recent transactions</h3></div><button type="button" class="subtle-button" data-view="transactions"><span data-i18n="common.view_all">View all</span><span aria-hidden="true">→</span></button></div>
+            <div class="table-wrap"><table class="transaction-table"><thead><tr><th data-i18n="table.date">Date</th><th data-i18n="table.type">Type</th><th data-i18n="table.counterparty">Counterparty</th><th data-i18n="table.category">Category</th><th data-i18n="table.amount">Amount</th><th data-i18n="table.status">Status</th><th></th></tr></thead><tbody id="recent-body"></tbody></table></div>
+            <div class="empty-state" id="overview-empty" hidden>
+              <div class="empty-art" aria-hidden="true"><span class="receipt-shadow"></span><span class="receipt"><i></i><i></i><i></i><b>৳</b></span><span class="coin coin-one"></span><span class="coin coin-two"></span></div>
+              <h4 data-i18n="empty.title">Your money story starts here.</h4><p data-i18n="empty.body">Paste your first SMS and we'll turn it into a tidy transaction.</p>
+              <div class="empty-actions"><button class="button button-primary" type="button" id="empty-add"><span data-i18n="empty.add">Paste your first SMS</span><span aria-hidden="true">→</span></button></div>
+            </div>
+          </section>
+          <footer class="page-footer"><span>© 2026 TakaTrack</span><span><span class="footer-leaf">✦</span> <span data-i18n="footer.note">Made for the everyday hustle.</span></span><a href="/healthz" target="_blank" rel="noreferrer" data-i18n="footer.status">System status</a></footer>
+        </section>
+
+        <section class="page-content transactions-page" id="transactions-view" hidden aria-labelledby="transactions-page-title">
+          <div class="page-title-row"><div><div class="section-eyebrow" data-i18n="transactions.eyebrow">YOUR LEDGER</div><h1 id="transactions-page-title" data-i18n="transactions.title">Transactions</h1><p class="page-lede" data-i18n="transactions.subtitle">Search, review, and keep every entry just right.</p></div><button type="button" class="button button-primary" id="transactions-add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="hero.add">Add SMS transactions</span></button></div>
+          <section class="surface-card ledger-card">
+            <div class="ledger-toolbar">
+              <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input id="search-input" type="search" placeholder="Search a shop or reference..." data-i18n-placeholder="filter.search" aria-label="Search transactions"></label>
+              <div class="filter-controls">
+                <label class="filter-select"><span class="sr-only" data-i18n="filter.type">Type</span><select id="type-filter"><option value="" data-i18n="filter.all_types">All types</option><option value="received" data-i18n="type.received">Received</option><option value="sent" data-i18n="type.sent">Sent</option><option value="cash-in" data-i18n="type.cashin">Cash-in</option><option value="cash-out" data-i18n="type.cashout">Cash-out</option><option value="payment" data-i18n="type.payment">Payment</option><option value="recharge" data-i18n="type.recharge">Recharge</option></select></label>
+                <label class="filter-select"><span class="sr-only" data-i18n="filter.category">Category</span><select id="category-filter"><option value="" data-i18n="filter.all_categories">All categories</option><option value="food" data-i18n="category.food">Food</option><option value="transport" data-i18n="category.transport">Transport</option><option value="recharge" data-i18n="category.recharge">Recharge</option><option value="bills" data-i18n="category.bills">Bills</option><option value="shopping" data-i18n="category.shopping">Shopping</option><option value="other" data-i18n="category.other">Other</option></select></label>
+              </div>
+            </div>
+            <div class="date-filter-row"><label><span data-i18n="filter.from">From</span><input id="date-from" type="date"></label><label><span data-i18n="filter.to">To</span><input id="date-to" type="date"></label><button type="button" class="text-link" id="clear-filters" data-i18n="filter.clear">Clear filters</button><div class="ledger-export"><button type="button" class="export-button" data-export="csv"><span class="export-icon">CSV</span><span data-i18n="export.csv">Export CSV</span></button><button type="button" class="export-button" data-export="pdf"><span class="export-icon pdf-icon">PDF</span><span data-i18n="export.pdf">Export PDF</span></button></div></div>
+            <div class="table-wrap ledger-table-wrap"><table class="transaction-table"><thead><tr><th data-i18n="table.date">Date</th><th data-i18n="table.type">Type</th><th data-i18n="table.counterparty">Counterparty</th><th data-i18n="table.category">Category</th><th data-i18n="table.amount">Amount</th><th data-i18n="table.reference">Reference</th><th data-i18n="table.status">Status</th><th></th></tr></thead><tbody id="transactions-body"></tbody></table></div>
+            <div class="ledger-empty" id="ledger-empty" hidden><div class="empty-orbit">⌕</div><h4 data-i18n="ledger.no_results">No matching transactions</h4><p data-i18n="ledger.no_results_hint">Try another search or clear your filters.</p></div>
+            <div class="ledger-footer"><span id="ledger-count">0 transactions</span><span class="ledger-footnote" data-i18n="privacy.local.short">Saved in your local SQLite database.</span></div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <dialog class="app-dialog import-dialog" id="import-dialog" aria-labelledby="import-title">
+    <form id="import-form" class="dialog-form">
+      <div class="dialog-topline"><span class="dialog-icon import-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5M5 14v5h14v-5"/></svg></span><button type="button" class="dialog-close" data-close="import-dialog" aria-label="Close">×</button></div>
+      <div class="section-eyebrow" data-i18n="import.eyebrow">QUICK ENTRY</div><h2 id="import-title" data-i18n="import.title">Bring in your SMS</h2><p class="dialog-description" data-i18n="import.subtitle">Paste one or more transaction messages. We'll take care of the sorting.</p>
+      <label class="field-label" for="sms-input" data-i18n="import.paste">Paste SMS messages</label><textarea id="sms-input" rows="6" placeholder="Paste a bKash, Nagad, Rocket or bank SMS here…" data-i18n-placeholder="import.placeholder"></textarea><div class="field-hint" data-i18n="import.multiple">Separate multiple messages with a blank line.</div>
+      <div class="or-divider"><span data-i18n="common.or">or</span></div>
+      <label class="upload-drop" for="sms-file"><span class="upload-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5M5 14v5h14v-5"/></svg></span><span><strong data-i18n="import.upload">Upload a .txt or .csv file</strong><small id="file-label" data-i18n="import.upload_hint">Choose a file up to 1 MB</small></span><span class="upload-arrow">→</span><input id="sms-file" type="file" accept=".txt,.csv,text/plain,text/csv" hidden></label>
+      <div class="privacy-inline"><span class="privacy-lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3"/></svg></span><span data-i18n="import.privacy">Saved on this app's machine. Uncertain messages may be sent to Gemini only if you configure a key.</span></div>
+      <div class="parse-skeleton" id="parse-skeleton" hidden><div class="skeleton-line wide"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div><span data-i18n="import.parsing">Reading your messages…</span></div>
+      <div class="dialog-error" id="import-error" role="alert" hidden></div>
+      <div class="import-result" id="import-result" hidden><span class="success-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span><span id="import-result-text"></span></div>
+      <div class="dialog-actions"><button type="button" class="button button-quiet" data-close="import-dialog" data-i18n="common.cancel">Cancel</button><button type="submit" class="button button-primary" id="import-submit"><span data-i18n="import.save">Parse &amp; save</span><span aria-hidden="true">→</span></button></div>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog edit-dialog" id="edit-dialog" aria-labelledby="edit-title">
+    <form id="edit-form" class="dialog-form">
+      <div class="dialog-topline"><span class="dialog-icon edit-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5 4 4M4 20l4-.8L19 8a2.8 2.8 0 0 0-4-4L4 15l-.8 5Z"/></svg></span><button type="button" class="dialog-close" data-close="edit-dialog" aria-label="Close">×</button></div>
+      <div class="section-eyebrow" data-i18n="edit.eyebrow">REVIEW ENTRY</div><h2 id="edit-title" data-i18n="edit.title">Fine-tune this entry</h2><p class="dialog-description" data-i18n="edit.subtitle">You can correct the transaction without changing its original SMS values.</p>
+      <input type="hidden" id="edit-id">
+      <div class="original-note" id="original-note"></div>
+      <div class="field-grid"><label class="field-label" for="edit-amount"><span data-i18n="field.amount">Amount</span><input id="edit-amount" type="number" min="0.000001" step="any" required></label><label class="field-label" for="edit-currency"><span data-i18n="field.currency">Currency (ISO code)</span><input id="edit-currency" type="text" maxlength="3" autocomplete="off" placeholder="BDT"></label></div>
+      <div class="field-grid"><label class="field-label" for="edit-type"><span data-i18n="field.type">Type</span><select id="edit-type"><option value="received" data-i18n="type.received">Received</option><option value="sent" data-i18n="type.sent">Sent</option><option value="cash-in" data-i18n="type.cashin">Cash-in</option><option value="cash-out" data-i18n="type.cashout">Cash-out</option><option value="payment" data-i18n="type.payment">Payment</option><option value="recharge" data-i18n="type.recharge">Recharge</option></select></label><label class="field-label" for="edit-category"><span data-i18n="field.category">Category</span><select id="edit-category"><option value="food" data-i18n="category.food">Food</option><option value="transport" data-i18n="category.transport">Transport</option><option value="recharge" data-i18n="category.recharge">Recharge</option><option value="bills" data-i18n="category.bills">Bills</option><option value="shopping" data-i18n="category.shopping">Shopping</option><option value="other" data-i18n="category.other">Other</option></select></label></div>
+      <label class="field-label" for="edit-counterparty"><span data-i18n="field.counterparty">Counterparty</span><input id="edit-counterparty" type="text" maxlength="200"></label>
+      <div class="field-grid"><label class="field-label" for="edit-fee"><span data-i18n="field.fee">Fee</span><input id="edit-fee" type="number" min="0" step="any"></label><label class="field-label" for="edit-balance"><span data-i18n="field.balance">Balance after transaction</span><input id="edit-balance" type="number" min="0" step="any"></label></div>
+      <div class="field-grid"><label class="field-label" for="edit-reference"><span data-i18n="field.reference">Transaction ID</span><input id="edit-reference" type="text" maxlength="128"></label><label class="field-label" for="edit-date"><span data-i18n="field.date">Date &amp; time</span><input id="edit-date" type="datetime-local"></label></div>
+      <details class="raw-sms-details"><summary data-i18n="edit.show_sms">View original SMS</summary><pre id="edit-raw"></pre></details>
+      <div class="dialog-error" id="edit-error" role="alert" hidden></div>
+      <div class="dialog-actions"><button type="button" class="button button-quiet" data-close="edit-dialog" data-i18n="common.cancel">Cancel</button><button type="submit" class="button button-primary" data-i18n="edit.save">Save changes</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog settings-dialog" id="settings-dialog" aria-labelledby="settings-title">
+    <div class="dialog-form">
+      <div class="dialog-topline"><span class="dialog-icon settings-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 13.5a7.5 7.5 0 0 0 0-3l2-1.5-2-3.5-2.5 1a7.6 7.6 0 0 0-2.6-1.5L13.5 2h-4L9 5a7.6 7.6 0 0 0-2.6 1.5l-2.5-1-2 3.5 2 1.5a7.5 7.5 0 0 0 0 3l-2 1.5 2 3.5 2.5-1A7.6 7.6 0 0 0 9 19l.5 3h4l.5-3a7.6 7.6 0 0 0 2.6-1.5l2.5 1 2-3.5-2-1.5Z"/></svg></span><button type="button" class="dialog-close" data-close="settings-dialog" aria-label="Close">×</button></div>
+      <div class="section-eyebrow" data-i18n="settings.eyebrow">MAKE IT YOURS</div><h2 id="settings-title" data-i18n="settings.title">Settings</h2><p class="dialog-description" data-i18n="settings.subtitle">Choose how your shop's money is shown.</p>
+      <label class="field-label" for="base-currency-select"><span data-i18n="settings.currency.title">Display currency</span><select id="base-currency-select"></select></label>
+      <div class="settings-helper" data-i18n="settings.currency.help">Original transaction amounts stay unchanged. Totals convert for display only.</div>
+      <label class="field-label" for="language-select"><span data-i18n="settings.language">Language</span><select id="language-select"><option value="en">English</option><option value="bn">বাংলা</option></select></label>
+      <div class="settings-divider"></div>
+      <div class="section-eyebrow" data-i18n="settings.manual.eyebrow">OFFLINE CONTROL</div><h3 class="settings-section-title" data-i18n="settings.manual.title">Manual exchange rate</h3><p class="settings-helper" data-i18n="settings.manual.help">Set how many display-currency units equal 1 unit of another currency. Manual rates take priority over online rates.</p>
+      <form id="manual-rate-form" class="manual-rate-form">
+        <label class="field-label" for="rate-from"><span data-i18n="settings.manual.from">From</span><input id="rate-from" type="text" maxlength="3" value="USD" required></label>
+        <span class="rate-equals">=</span>
+        <label class="field-label" for="rate-value"><span data-i18n="settings.manual.rate">Rate</span><input id="rate-value" type="number" min="0.000000000001" step="any" placeholder="120.50" required></label>
+        <label class="field-label" for="rate-to"><span data-i18n="settings.manual.to">To</span><input id="rate-to" type="text" maxlength="3" placeholder="BDT" required></label>
+        <button type="submit" class="button button-primary manual-rate-save" data-i18n="settings.manual.save">Save rate</button>
+      </form>
+      <div id="manual-rate-list" class="manual-rate-list"></div>
+      <div class="settings-rate-note" data-i18n="settings.rate.note">Online reference rates are keyless, cached once retrieved, and can be stale. Check a rate before relying on converted totals.</div>
+      <div class="dialog-error" id="settings-error" role="alert" hidden></div>
+      <div class="dialog-actions"><button type="button" class="button button-quiet" data-close="settings-dialog" data-i18n="common.done">Done</button></div>
+    </div>
+  </dialog>
+
+  <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

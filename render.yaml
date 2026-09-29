@@ -1,0 +1,16 @@
+# One-click deploy on Render.com (Blueprint). GitHub Pages cannot run Python, so use this instead.
+services:
+  - type: web
+    name: takatrack
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips="*"
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: DATABASE_URL   # paste your Postgres URL (Neon/Supabase/Render Postgres) in the Render dashboard
+        sync: false
+      - key: GEMINI_API_KEY # optional; paste in the Render dashboard, never in code
+        sync: false

@@ -1,0 +1,1 @@
+"""TakaTrack application package."""
