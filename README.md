@@ -19,9 +19,6 @@ Open <http://127.0.0.1:3000>. Stop the local server with `Ctrl+C`.
 
 The default database is `data/takatrack.db`. Tables and the initial BDT/English preferences are created automatically at startup. You can set a different SQLAlchemy SQLite URL with `DATABASE_URL` in `.env`.
 
-### Optional Gemini fallback
-
-Edit the ignored local `.env` file and set a valid `GEMINI_API_KEY`. The app reads it with `python-dotenv` on the backend; it is never included in HTML or JavaScript. `GEMINI_MODEL` can override the default model. Gemini is used only for uncertain parses; the request asks for structured JSON and the result is validated before saving. The Gemini call is made only from the server, and the API request is stateless (`store: false`). Do not commit `.env` or paste credentials into source files.
 
 ## Run and check each implementation phase
 
