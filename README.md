@@ -73,14 +73,6 @@ The live contract test makes read-only requests for all three dashboard periods,
 .venv/bin/python -m pytest -q
 ```
 
-## Deploying online (GitHub + Render)
-
-GitHub Pages **cannot** run this app (it only hosts static files; TakaTrack needs Python). Push the code to GitHub, then host it on Render (or Railway/Fly.io):
-
-1. Create a free Postgres database (Neon, Supabase, or Render Postgres) and copy its connection URL. Free web hosts wipe local files on restart, so SQLite is only for local use.
-2. On <https://render.com> choose **New → Blueprint** (or **Web Service**) and select your GitHub repo. `render.yaml` already contains the build and start commands.
-3. In the Render dashboard, add environment variables: `DATABASE_URL` (the Postgres URL) and, optionally, `GEMINI_API_KEY`. Never put keys in code or commit `.env`.
-4. Deploy, then open the Render URL. Tables are created automatically on first start.
 
 ## Privacy and data notes
 
