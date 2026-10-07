@@ -2,16 +2,6 @@
 
 A mobile-first SMS expense tracker for independent shop owners. TakaTrack parses mobile-money and bank alerts, keeps the original amount and currency immutable, and presents an editable ledger, multi-currency dashboard, and CSV/PDF reports.
 
-## What is included
-
-- FastAPI + SQLAlchemy + SQLite backend; Jinja-rendered HTML, Tailwind CSS CDN, and vanilla JavaScript frontend.
-- Regex-first parsing with strict Pydantic validation. When `GEMINI_API_KEY` is configured, uncertain messages may use the server-side Gemini JSON extractor; without a key, uncertain parses are marked for review.
-- Paste, `.txt`, and `.csv` SMS import; duplicate transaction-ID and normalized-message checks; editable transaction/category fields.
-- Daily, weekly, and monthly dashboard totals, cash-flow chart, category breakdown, top counterparties, search, date/type/category filters, and report export.
-- Display-currency setting with keyless [Frankfurter](https://frankfurter.dev/) exchange-rate lookup, a 24-hour database cache, and manual offline rates. Original transaction amounts/currencies are not overwritten.
-- English and Bengali UI, remembered light/dark theme, responsive layout, and reduced-motion support.
-- Five synthetic SMS files in `samples/`, used only by the automated tests.
-
 ## Local setup and run
 
 Python 3.11+ is required. Node.js 18+ is only needed for the optional live API/JavaScript contract smoke test; the application itself does not require Node.
