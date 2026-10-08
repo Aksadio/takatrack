@@ -60,15 +60,6 @@ The live contract test makes read-only requests for all three dashboard periods,
 .venv/bin/python -m pytest -q
 ```
 
-
-## Privacy and data notes
-
-- Every visitor gets a random, HttpOnly cookie (`tt_owner`). All transactions, settings and manual exchange rates are filtered by it, so each new user starts with a completely empty ledger and cannot see anyone else's data. There is no login: clearing cookies or using another browser/device starts a new, empty ledger, so users should export CSV/PDF backups. Add real accounts (email/Google login) if you need cross-device sync.
-- There are no built-in sample transactions. The files in `samples/` are only test fixtures.
-- If uncertain SMS is sent to Gemini, the message is transmitted to Google's API. Keep `GEMINI_API_KEY` server-side and enable Gemini only if that data flow is acceptable.
-- Exchange-rate availability depends on Frankfurter's supported currencies and service availability. The app uses cached data and manual overrides where possible; stale and unavailable conversions are surfaced rather than silently fabricated. For important accounting decisions, verify rates independently.
-- Many SMS alerts do not specify a timezone. Parsed timestamps preserve the local date/time text when recognizable; the app does not infer a timezone.
-
 ## Project structure
 
 ```text
